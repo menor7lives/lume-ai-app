@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: lume-ai-app
+    env: node
+    region: ohio
+    plan: free
+    autoDeploy: true
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: PUBLIC_MODE
+        value: "true"
+      - key: LUME_DATA_DIR
+        value: /tmp/lume-data
+      - key: PUBLIC_DAILY_MESSAGE_CAP
+        value: "500"
+      - key: DISCORD_URL
+        value: https://discord.gg/DHe8aZmTjK
+      - key: LUME_API_KEY
+        sync: false
