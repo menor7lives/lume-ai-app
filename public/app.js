@@ -928,6 +928,7 @@ async function streamRequest(body, stream) {
   let gotText = false;
   let donePayload = null;
   let errorMessage = null;
+  let noticeShown = false;
 
   try {
     const res = await fetch('/api/chat', {
@@ -951,7 +952,10 @@ async function streamRequest(body, stream) {
       if (event === 'meta') {
         if (payload.title && state.current) state.current.title = payload.title;
         if (payload.model) state.settings.model = payload.model;
-        if (payload.notice) toast(payload.notice, 'info');
+        if (payload.notice && !noticeShown) {
+          noticeShown = true;
+          toast(payload.notice, 'info');
+        }
         if (payload.billing) {
           state.billing = payload.billing;
           renderBilling();

@@ -785,6 +785,7 @@ app.post('/api/chat', ah(async (req, res) => {
   let sources = [];
   let usedModel = startModel;
   let usedFallbackText = false;
+  let fallbackNoticeSent = false;
   const triedModels = new Set([usedModel]);
 
   try {
@@ -835,13 +836,17 @@ app.post('/api/chat', ah(async (req, res) => {
             triedModels.add(fallback);
             usedModel = fallback;
             if (err.status === 404) await req.lumeStore.saveSettings({ model: fallback }).catch(() => {});
+            const notice = fallbackNoticeSent
+              ? undefined
+              : 'O Lume AI usou uma versão alternativa para continuar respondendo.';
+            fallbackNoticeSent = true;
             send('meta', {
               conversation: fresh,
               title: fresh.title,
               model: fallback,
               modelName: brandModelName(fallback),
               billing,
-              notice: 'O Lume AI usou uma versão alternativa para continuar respondendo.',
+              ...(notice ? { notice } : {}),
             });
             continue;
           }
@@ -859,13 +864,17 @@ app.post('/api/chat', ah(async (req, res) => {
               usedFallbackText = true;
               full = alternative;
               send('delta', { text: alternative });
+              const notice = fallbackNoticeSent
+                ? undefined
+                : 'O motor principal atingiu o limite agora. O Lume AI continuou com um modo alternativo.';
+              fallbackNoticeSent = true;
               send('meta', {
                 conversation: fresh,
                 title: fresh.title,
                 model: startModel,
                 modelName: 'Lume AI',
                 billing,
-                notice: 'O motor principal atingiu o limite agora. O Lume AI continuou com um modo alternativo.',
+                ...(notice ? { notice } : {}),
               });
               break;
             }
